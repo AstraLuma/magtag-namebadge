@@ -43,3 +43,19 @@ name = {
     },
 }
 ```
+
+To select the display, press the appropriate button. The corresponding NeoPixel will light, and a tone will play before and after the display is refreshed.
+
+### Example Output
+
+#### Display A
+![Display A from above code](/samples/display_a.jpg)
+
+#### Display B
+![Display B from above code](/samples/display_b.jpg)
+
+#### Display C
+![Display C from above code](/samples/display_c.jpg)
+
+#### Display D
+![Display D from above code](/samples/display_d.jpg)
