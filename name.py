@@ -1,3 +1,7 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+# SPDX-License-Identifier: FAFOL
+
 from adafruit_magtag.magtag import MagTag
 
 
