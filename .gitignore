@@ -1,4 +1,8 @@
 secrets.py
 lib/
 boot_out.txt
-.vscode/
+.vscode/.Trashes
+.metadata_never_index
+System Volume Information/
+.Trashes
+.vscode/settings.json
