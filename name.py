@@ -50,7 +50,7 @@ class NameDisplay():
         self.magtag.peripherals.neopixels.show()
 
         # play a tone to indicate start of render
-        self.magtag.peripherals.play_tone(self.button_tone, 0.25)
+        # self.magtag.peripherals.play_tone(self.button_tone, 0.25)
 
         # render text fields
         if self.name1 is not None:
@@ -65,7 +65,7 @@ class NameDisplay():
         self.magtag.refresh()
 
         # play a tone to indicate end of render
-        self.magtag.peripherals.play_tone(self.button_tone + 250, 0.25)
+        # self.magtag.peripherals.play_tone(self.button_tone + 250, 0.25)
 
         # turn off NeoPixels
         self.magtag.peripherals.neopixel_disable = True
