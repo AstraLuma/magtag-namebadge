@@ -6,12 +6,14 @@ import time
 
 import alarm
 import board
+import mdns
+import socketpool
+import wifi
 
 from adafruit_magtag.magtag import MagTag
 
 from name import NameDisplay, NameTag
-
-magtag = MagTag()
+from finger import FingerServ
 
 # Get wifi details and more from a secrets.py file
 try:
@@ -20,38 +22,69 @@ except ImportError:
     print("WiFi and name secrets are kept in secrets.py, please add them there!")
     raise
 
+FINGER_PORT = 79
+
+
+class TagFinger(FingerServ):
+    @property
+    def persona(self):
+        return name[DISPLAY]
+
+    @property
+    def personas(self):
+        yield from name.values()
+
+    def find_persona(self, handle):
+        for p in self.personas:
+            if p.get('handle', None) == handle:
+                return p
+    
+    def user_info(self, send, username, *, verbose):
+        user = self.find_persona(username)
+        send(f"Login: {user['handle']}\n")
+        send(f"Name: {user['name1']} {user['name2']}\n")
+        send(f"Pronouns: {'/'.join(user['pronouns'])}\n")
+
+    def list_users(self, send, *, verbose):
+        cur = self.persona
+        for p in self.personas:
+            if p:
+                send(f"{p['handle']}\n")
+
+
+wifi.radio.hostname = secrets['hostname']
+wifi.radio.connect(secrets["ssid"], secrets["password"])
+
+server = mdns.Server(wifi.radio)
+server.hostname = wifi.radio.hostname
+server.advertise_service(service_type='_finger', protocol='_tcp', port=FINGER_PORT)
+
+magtag = MagTag()
+
 DISPLAYS = NameTag(magtag=magtag, name=name)
-
-orig = None
 DISPLAY = 'A'
+DISPLAYS.render(display=DISPLAY)
 
-# Check to see if we are in the first startup
-if alarm.wake_alarm:
-    orig = DISPLAY = chr(alarm.sleep_memory[0])
-    if DISPLAY not in 'ABCD':
-        # oh no
-        DISPLAY = 'A'
-        orig = None
-    if isinstance(alarm.wake_alarm, alarm.time.TimeAlarm):
-        # Do nothing, just let the button scan happen
-        pass
-    # TODO: Look for button
+fingerd = TagFinger()
 
-for i, b in enumerate(magtag.peripherals.buttons):
-    if not b.value:
-        DISPLAY = 'ABCD'[i]
-        print(f'Button {DISPLAY} pressed')
-        break
+# TODO: IPv6
+pool = socketpool.SocketPool(wifi.radio)
+sock = pool.socket()
 
-if orig != DISPLAY:
-    DISPLAYS.render(display=DISPLAY)
+sock.bind((str(wifi.radio.ipv4_address), FINGER_PORT))
+sock.listen(2)
 
-alarm.sleep_memory[0] = ord(DISPLAY)
+print("Listening")
+while True:
+    conn, addr = sock.accept()
+    print("Connected to", addr)
+    fingerd(conn)
 
-alarm.exit_and_deep_sleep_until_alarms(
-    alarm.time.TimeAlarm(monotonic_time=time.monotonic() + 5),
-    # alarm.pin.PinAlarm(pin=board.D15, value=False, pull=True),
-    # alarm.pin.PinAlarm(pin=board.D14, value=False, pull=True),
-    # alarm.pin.PinAlarm(pin=board.D12, value=False, pull=True),
-    # alarm.pin.PinAlarm(pin=board.D11, value=False, pull=True),
-)
+while True:
+    for i, b in enumerate(magtag.peripherals.buttons):
+        if not b.value:
+            DISPLAY = 'ABCD'[i]
+            print(f'Button {DISPLAY} pressed')
+            DISPLAYS.render(display=DISPLAY)
+            break
+    time.sleep(0.01)
