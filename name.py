@@ -54,14 +54,14 @@ class NameDisplay():
 
         # render text fields
         if self.name1 is not None:
-            self.magtag.set_text(self.name1, 0, auto_refresh=False)
+            self.magtag.set_text(self.name1.upper(), 0, auto_refresh=False)
         if self.name2 is not None:
             self.magtag.set_text(self.name2, 1, auto_refresh=False)
         if self.handle is not None:
             self.magtag.set_text(f'({self.handle})', 2, auto_refresh=False)
         if self.pronouns is not None:
-            self.magtag.set_text(
-                f'Please use {self.pronouns.upper()} pronouns', 3, auto_refresh=False)
+            for i, pronoun in enumerate(self.pronouns):
+                self.magtag.set_text(pronoun, 3 + i, auto_refresh=False)
         self.magtag.refresh()
 
         # play a tone to indicate end of render
@@ -135,12 +135,29 @@ class NameTag(dict):
             text_scale=1,
             text_color=0x404040,
         )
-        # pronouns field
+        # pronouns 1 field
         self.magtag.add_text(
-            text_font="/fonts/Arial-14.pcf",
-            text_position=(10, 110),
-            text_scale=1,
-            text_color=0x404040,
+            text_font="/fonts/Arial-18.pcf",
+            text_position=(290, 15),
+            text_anchor_point=(1, 0.5),
+            text_scale=2,
+            text_color=0x00000,
+        )
+        # pronouns 2 field
+        self.magtag.add_text(
+            text_font="/fonts/Arial-18.pcf",
+            text_position=(290, 55),
+            text_anchor_point=(1, 0.5),
+            text_scale=2,
+            text_color=0x00000,
+        )
+        # pronouns 3 field
+        self.magtag.add_text(
+            text_font="/fonts/Arial-18.pcf",
+            text_position=(290, 95),
+            text_anchor_point=(1, 0.5),
+            text_scale=2,
+            text_color=0x00000,
         )
         self.magtag.preload_font()
 

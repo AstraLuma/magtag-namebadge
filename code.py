@@ -5,17 +5,13 @@
 import time
 
 import alarm
-from adafruit_magtag.magtag import MagTag
 import board
 
-magtag = MagTag()
+from adafruit_magtag.magtag import MagTag
 
-# Get nametag functions from name.py file
-try:
-    from name import *
-except ImportError:
-    print("WiFi and name secrets are kept in secrets.py, please add them there!")
-    raise
+from name import NameDisplay, NameTag
+
+magtag = MagTag()
 
 # Get wifi details and more from a secrets.py file
 try:
