@@ -1,6 +1,4 @@
-BUFFSIZE = 512
-
-recvbuff = bytearray(BUFFSIZE)
+BUFFSIZE = 64
 
 class FingerServ:
     def user_info(self, send, username, verbose):
@@ -11,20 +9,37 @@ class FingerServ:
 
     def __call__(self, conn):
         try:
-            cnt = conn.recv_into(recvbuff, len(recvbuff))
+            recvbuff = bytearray(BUFFSIZE)
+            linebuff = bytearray()
 
-            if cnt == len(recvbuff):
-                # Too long
-                conn.send(b"no. request too long.\n")
-                return
+            while '\n' not in linebuff:
+                try:
+                    cnt = conn.recv_into(recvbuff, len(recvbuff))
+                except OSError as exc:
+                    if exc.errno == 11:  # EAGAIN
+                        continue
+                    else:
+                        raise
+                else:
+                    linebuff += recvbuff[:cnt]
 
-            if b'@' in recvbuff:
+                    if not cnt:
+                        break
+
+                    if len(linebuff) > BUFFSIZE * 8:
+                        # Too long
+                        conn.send(b"no. request too long.\n")
+                        return
+
+            if b'@' in linebuff:
                 # not implemented
                 conn.send(b"no. go ask them yourself.\n")
                 return
 
-            line = recvbuff[:cnt].decode('utf-8')
+            line = linebuff.decode('utf-8')
             print("received", repr(line))
+
+            del linebuff, recvbuff
 
             # Parse it out
             if line.startswith('/W '):

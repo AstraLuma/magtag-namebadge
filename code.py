@@ -41,9 +41,12 @@ class TagFinger(FingerServ):
     
     def user_info(self, send, username, *, verbose):
         user = self.find_persona(username)
-        send(f"Login: {user['handle']}\n")
-        send(f"Name: {user['name1']} {user['name2']}\n")
-        send(f"Pronouns: {'/'.join(user['pronouns'])}\n")
+        if user:
+            send(f"Login: {user['handle']}\n")
+            send(f"Name: {user['name1']} {user['name2']}\n")
+            send(f"Pronouns: {'/'.join(user['pronouns'])}\n")
+        else:
+            send('no. user does not exist.')
 
     def list_users(self, send, *, verbose):
         cur = self.persona
