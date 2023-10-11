@@ -6,3 +6,6 @@ boot_out.txt
 System Volume Information/
 .Trashes
 .vscode/settings.json
+adafruit_portalbase
+settings.toml
+.fseventsd
